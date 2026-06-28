@@ -1,0 +1,65 @@
+data = '''{% extends "base.html" %}
+{% block content %}
+<div style="display:flex;height:100vh;">
+<div style="width:300px;background:#075e54;color:white;overflow-y:auto;">
+<div style="padding:1rem;border-bottom:1px solid rgba(255,255,255,0.2);">
+<strong>{{ request.user.username }}</strong>
+<a href="/logout/" style="float:right;color:#ccc;">Logout</a>
+</div>
+{% for user in users %}
+<a href="/chat/{{ user.id }}/" style="display:block;padding:1rem;text-decoration:none;color:white;border-bottom:1px solid rgba(255,255,255,0.1);">{{ user.username }}</a>
+{% endfor %}
+</div>
+<div style="flex:1;display:flex;flex-direction:column;background:#e5ddd5;">
+{% if chat_with %}
+<div style="background:#075e54;color:white;padding:1rem;"><strong>{{ chat_with.username }}</strong></div>
+<div id="messages" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.5rem;">
+{% for msg in messages %}
+<div style="display:flex;justify-content:{% if msg.sender == request.user %}flex-end{% else %}flex-start{% endif %};">
+<div style="max-width:60%;padding:0.6rem 1rem;border-radius:12px;background:{% if msg.sender == request.user %}#dcf8c6{% else %}white{% endif %};">{{ msg.content }}</div>
+</div>
+{% endfor %}
+</div>
+<div style="background:white;padding:0.75rem;display:flex;gap:0.5rem;">
+<input id="messageInput" type="text" placeholder="Type a message..." style="flex:1;padding:0.7rem;border:1px solid #ddd;border-radius:24px;outline:none;">
+<button onclick="sendMessage()" style="padding:0.7rem 1.5rem;background:#075e54;color:white;border:none;border-radius:24px;cursor:pointer;">Send</button>
+</div>
+<script>
+var currentUserId = {{ request.user.id }};
+var otherUserId = {{ chat_with.id }};
+var messagesDiv = document.getElementById("messages");
+messagesDiv.scrollTop = messagesDiv.scrollHeight;
+var socket = new WebSocket("ws://127.0.0.1:8000/ws/chat/" + otherUserId + "/");
+socket.onmessage = function(e) {
+var data = JSON.parse(e.data);
+var isMine = data.sender_id === currentUserId;
+var div = document.createElement("div");
+div.style.cssText = "display:flex;justify-content:" + (isMine ? "flex-end" : "flex-start") + ";";
+div.innerHTML = "<div style='max-width:60%;padding:0.6rem 1rem;border-radius:12px;background:" + (isMine ? "#dcf8c6" : "white") + ";'>" + data.message + "</div>";
+messagesDiv.appendChild(div);
+messagesDiv.scrollTop = messagesDiv.scrollHeight;
+};
+function sendMessage() {
+var input = document.getElementById("messageInput");
+var content = input.value.trim();
+if (!content) return;
+socket.send(JSON.stringify({message: content}));
+input.value = "";
+}
+document.getElementById("messageInput").addEventListener("keypress", function(e) {
+if (e.key === "Enter") sendMessage();
+});
+</script>
+{% else %}
+<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#666;">
+<div style="text-align:center;"><div style="font-size:4rem;">💬</div><p>Select a person to start chatting</p></div>
+</div>
+{% endif %}
+</div>
+</div>
+{% endblock %}'''
+
+f = open('templates/chat.html', 'w', encoding='utf-8')
+f.write(data)
+f.close()
+print('Done! chat.html created successfully!')

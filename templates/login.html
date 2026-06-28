@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="display:flex; justify-content:center; align-items:center; height:100vh;">
+    <div style="background:white; padding:2rem; border-radius:12px; width:360px; box-shadow:0 2px 16px rgba(0,0,0,0.1);">
+        <h2 style="text-align:center; color:#075e54; margin-bottom:1.5rem;">💬 ChatApp</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" style="width:100%; padding:0.75rem; background:#075e54; color:white; border:none; border-radius:8px; font-size:1rem; cursor:pointer;">Login</button>
+        </form>
+        <p style="text-align:center; margin-top:1rem;">No account? <a href="{% url 'register' %}" style="color:#075e54;">Register</a></p>
+    </div>
+</div>
+{% endblock %}
