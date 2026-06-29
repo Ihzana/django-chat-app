@@ -105,11 +105,10 @@ WSGI_APPLICATION = 'chat_project.wsgi.application'
 
 import dj_database_url
 
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres:1234@localhost:5432/chat_db')
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://postgres:1234@localhost:5432/chat_db',
-        conn_max_age=600
-    )
+    'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
 }
 
 
